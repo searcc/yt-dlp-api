@@ -1,3 +1,4 @@
+import os
 from app.routers import *
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
@@ -28,18 +29,24 @@ app = FastAPI(
     },
 )
 
-origins = ['*']
-
-app.mount('/web', StaticFiles(directory='/app/app/web'), name='web')
-app.include_router(info_router)
-app.include_router(video_info_router)
-
+# Robust CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_methods=origins,
-    allow_headers=origins,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
+# Dynamically find the web directory relative to this file
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+web_dir = os.path.join(BASE_DIR, 'web')
+
+if os.path.exists(web_dir):
+    app.mount('/web', StaticFiles(directory=web_dir), name='web')
+
+app.include_router(info_router)
+app.include_router(video_info_router)
 
 @app.middleware('http')
 async def check_x_token_header(request: Request, call_next):
