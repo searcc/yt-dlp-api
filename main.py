@@ -1,4 +1,4 @@
-from routers import *
+from app.routers import *
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi_pagination import add_pagination
